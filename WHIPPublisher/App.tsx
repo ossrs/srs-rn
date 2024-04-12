@@ -11,7 +11,9 @@ import {
   SafeAreaView,
   View
 } from "react-native";
-import { mediaDevices, MediaStream, RTCPeerConnection, RTCSessionDescription, RTCView } from "react-native-webrtc";
+import {
+  mediaDevices, MediaStream, RTCPeerConnection, RTCSessionDescription, RTCView
+} from "react-native-webrtc";
 
 // See https://ossrs.io/lts/en-us/docs/v5/doc/webrtc#http-api
 const WHIPUrl = 'http://192.168.1.100:1985/rtc/v1/whip/?app=live&stream=livestream';
@@ -48,7 +50,7 @@ function App(): React.JSX.Element {
 
     const response = await fetch(
       WHIPUrl, {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
+        method: 'POST', headers: {'Content-Type': 'application/sdp'},
         body: offer.sdp,
       },
     );

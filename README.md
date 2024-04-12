@@ -56,6 +56,8 @@ and view stream by browser via WHEP:
 
 You can also use other WHEP player to view the steam.
 
+> Note: For WHEP player, the application requires permission `NSCameraUsageDescription` and `NSMicrophoneUsageDescription`.
+
 ## Usage: WHEPPlayer for iOS
 
 Make sure you have completed the [React Native - Setting up the development environment](https://reactnative.dev/docs/environment-setup?guide=native)
@@ -101,3 +103,5 @@ Press `i` to run on iOS. Publish stream by browser or OBS via WHIP. Click the `S
 > Note: Please change the IP address `192.168.1.100` to your own WebRTC service IP address.
 
 You can also use other WHIP application to publish the steam.
+
+> Note: For WHEP player, the application requires permission `NSMicrophoneUsageDescription`.

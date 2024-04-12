@@ -32,12 +32,6 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-  <key>NSCameraUsageDescription</key>
-  <string>CAMERA PERMISSION DESCRIPTION</string>
-  <key>NSSpeechRecognitionUsageDescription</key>
-  <string>Speech Recognition Usage Description</string>
-  <key>NSMicrophoneUsageDescription</key>
-  <string>AUDIO PERMISSION DESCRIPTION</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>UILaunchStoryboardName</key>
@@ -54,5 +48,10 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+        <!-- For WebRTC WHIP -->
+        <key>NSCameraUsageDescription</key>
+        <string>CAMERA PERMISSION DESCRIPTION</string>
+        <key>NSMicrophoneUsageDescription</key>
+        <string>AUDIO PERMISSION DESCRIPTION</string>
 </dict>
 </plist>

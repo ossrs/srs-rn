@@ -48,5 +48,8 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+        <!-- For WebRTC WHEP player -->
+        <key>NSMicrophoneUsageDescription</key>
+        <string>AUDIO PERMISSION DESCRIPTION</string>
 </dict>
 </plist>

@@ -55,3 +55,49 @@ and view stream by browser via WHEP:
 > Note: Please change the IP address `192.168.1.100` to your own WebRTC service IP address.
 
 You can also use other WHEP player to view the steam.
+
+## Usage: WHEPPlayer for iOS
+
+Make sure you have completed the [React Native - Setting up the development environment](https://reactnative.dev/docs/environment-setup?guide=native)
+instructions till `Creating a new application` step, before proceeding.
+
+Clone code and change to directory:
+
+```bash
+git clone https://github.com/ossrs/srs-rn.git
+cd srs-rn/WHEPPlayer
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Install pods for iOS:
+
+```bash
+pod install --project-directory=ios
+```
+
+Open the `ios/WHEPPlayer.xcworkspace` and setup the development team by `Signing & Capabilities > Team`:
+
+```bash
+open ios/WHEPPlayer.xcworkspace
+```
+
+Start application:
+
+```bash
+npm start ios
+```
+
+Press `i` to run on iOS. Publish stream by browser or OBS via WHIP. Click the `Start` button, which play stream via 
+[WHEP](https://ossrs.io/lts/en-us/docs/v5/doc/webrtc#http-api):
+
+* WHIP: `http://192.168.1.100:1985/rtc/v1/whip/?app=live&stream=livestream`
+* WHEP: `http://192.168.1.100:1985/rtc/v1/whep/?app=live&stream=livestream`
+
+> Note: Please change the IP address `192.168.1.100` to your own WebRTC service IP address.
+
+You can also use other WHIP application to publish the steam.

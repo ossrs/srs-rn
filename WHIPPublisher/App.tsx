@@ -6,113 +6,99 @@
  */
 
 import React from 'react';
-import type {PropsWithChildren} from 'react';
 import {
+  Button,
   SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+  View
+} from "react-native";
+import { mediaDevices, MediaStream, RTCPeerConnection, RTCSessionDescription, RTCView } from "react-native-webrtc";
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+// See https://ossrs.io/lts/en-us/docs/v5/doc/webrtc#http-api
+const WHIPUrl = 'http://192.168.1.100:1985/rtc/v1/whip/?app=live&stream=livestream';
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const [pc, setPC] = React.useState<RTCPeerConnection>(null);
+  const [stream, setStream] = React.useState<MediaStream | null>(null);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  const startPublishing = React.useCallback(async () => {
+    const peerConnection = new RTCPeerConnection(null);
+    console.log('peerConnection', peerConnection);
+    setPC(peerConnection);
+
+    // See https://github.com/react-native-webrtc/react-native-webrtc/blob/master/Documentation/BasicUsage.md#creating-a-peer-connection
+    peerConnection.addEventListener('iceconnectionstatechange', event => {
+      console.log(`event iceconnectionstatechange: ${JSON.stringify(event)}`);
+    });
+
+    peerConnection.addTransceiver('audio', { direction: 'sendonly' });
+    peerConnection.addTransceiver('video', { direction: 'sendonly' });
+
+    const mediaStream = await mediaDevices.getUserMedia({ video: true, audio: true });
+    console.log(`localStream ${mediaStream.id} created, url: ${mediaStream.toURL()}`);
+    setStream(mediaStream);
+
+    mediaStream.getTracks().forEach((track) => {
+      peerConnection.addTrack(track);
+      console.log(`track ${track.id} ${track.kind} added to pc ${peerConnection._pcId}`);
+    });
+
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    console.log(`offer ${offer.type} created, sdp: ${offer.sdp}`);
+
+    const response = await fetch(
+      WHIPUrl, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: offer.sdp,
+      },
+    );
+    if (!response.ok) {
+      console.error(`failed to publish: ${response.status} ${response.statusText}`);
+      return;
+    }
+
+    const answerSDP = await response.text();
+    console.log(`answer sdp: ${answerSDP}`);
+
+    await peerConnection.setRemoteDescription(
+      new RTCSessionDescription({type: 'answer', sdp: answerSDP})
+    );
+    console.log(`set answer sdp ok`);
+  }, [setStream, setPC]);
+
+  const stopPublishing = React.useCallback(async () => {
+    if (pc) {
+      pc.close();
+      console.log(`pc ${pc._pcId} closed`);
+    }
+
+    if (stream) {
+      stream.getTracks().forEach((track) => {
+        track.stop();
+        console.log(`track ${track.id} ${track.kind} stopped`);
+      });
+      console.log(`stream ${stream.id} closed`);
+    }
+
+    setStream(null);
+    setPC(null);
+  }, [stream, setStream, pc, setPC]);
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+    <SafeAreaView>
+        <View>
+          {!stream && <Button title='Start' onPress={startPublishing}></Button>}
+          {stream && <Button title='Stop' onPress={stopPublishing}></Button>}
+          {stream && <View style={{width: 300, height: 400, borderWidth: 1}}>
+            <RTCView
+              streamURL={stream.toURL()}
+              objectFit="cover"
+              style={{width: '100%', height: '100%'}}
+            />
+          </View>}
         </View>
-      </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
